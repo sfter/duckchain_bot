@@ -13,7 +13,11 @@ LINK GROUP TELEGRAM : https://t.me/UxScript
 
 ## Instalasi
 
-## TERMUX
+## Create query.txt to add query tokens.
+```bash
+$ nano query.txt
+```
+
 ### Instal pustaka yang dibutuhkan:
 ```bash
 $ python3 -m pip install -r requirements.txt
@@ -21,6 +25,7 @@ $ python3 -m pip install -r requirements.txt
 ### Jalankan Bot   
 ```bash
 $ python3 main.py
+$ nohup python3 main.py >> stdout.log &
 ```
 
 ## WINDOWS
