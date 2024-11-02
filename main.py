@@ -153,37 +153,41 @@ class DuckChainAPI:
         self.timeout = timeout
 
     def _make_request(self, endpoint, params=None, retries=3):
-        url = f"{self.base_url}{endpoint}"
+        try:
+            url = f"{self.base_url}{endpoint}"
 
-        if params:
-            url += '?' + urllib.parse.urlencode(params)
+            if params:
+                url += '?' + urllib.parse.urlencode(params)
 
-        req = urllib.request.Request(url, headers=self.headers)
+            req = urllib.request.Request(url, headers=self.headers)
 
-        if self.proxy:
-            proxy_handler = urllib.request.ProxyHandler({'http': self.proxy, 'https': self.proxy})
-            opener = urllib.request.build_opener(proxy_handler)
-            urllib.request.install_opener(opener)
+            if self.proxy:
+                proxy_handler = urllib.request.ProxyHandler({'http': self.proxy, 'https': self.proxy})
+                opener = urllib.request.build_opener(proxy_handler)
+                urllib.request.install_opener(opener)
 
-        for attempt in range(retries):
-            try:
-                with urllib.request.urlopen(req, timeout=self.timeout) as response:
-                    return json.load(response)
-            except urllib.error.HTTPError as e:
-                log(f"HTTP Error encountered: {e.code} - {e.reason}")
-                return None
-            except urllib.error.URLError as e:
-                log(f"URL Error encountered: {e.reason}")
-                log(htm + "═" * 39)
-                return None
-            except http.client.RemoteDisconnected:
-                log(f"Remote disconnection occurred. Attempt {attempt + 1} unsuccessful. Initiating retry...")
-                time.sleep(2)
-                continue
-            except TimeoutError:
-                log(f"Operation timed out. Attempt {attempt + 1} unsuccessful. Initiating retry...")
-                time.sleep(2)
-                continue
+            for attempt in range(retries):
+                try:
+                    with urllib.request.urlopen(req, timeout=self.timeout) as response:
+                        return json.load(response)
+                except urllib.error.HTTPError as e:
+                    log(f"HTTP Error encountered: {e.code} - {e.reason}")
+                    return None
+                except urllib.error.URLError as e:
+                    log(f"URL Error encountered: {e.reason}")
+                    log(htm + "═" * 39)
+                    return None
+                except http.client.RemoteDisconnected:
+                    log(f"Remote disconnection occurred. Attempt {attempt + 1} unsuccessful. Initiating retry...")
+                    time.sleep(2)
+                    continue
+                except TimeoutError:
+                    log(f"Operation timed out. Attempt {attempt + 1} unsuccessful. Initiating retry...")
+                    time.sleep(2)
+                    continue
+        except Exception as e:
+            log(f"Caught an exception: {e}")     
+
         log("All retry attempts have been exhausted without success.")
         return None
 
@@ -192,6 +196,9 @@ class DuckChainAPI:
     
     def check_in(self):
         return self._make_request("/task/sign_in?")
+    
+    def check_egg(self):
+        return self._make_request("/property/daily/finish?taskId=1")
 
     def execute_tap(self):
         return self._make_request("/quack/execute")
@@ -344,6 +351,7 @@ def main():
                 log_user_info(user_info)
 
                 duck.perform_sign()
+                duck.check_egg()
                 duck.open_all_boxes()
 
                 for i in range(quack_amount):
@@ -363,7 +371,7 @@ def main():
                 countdown_timer(account_delay)
         except Exception as e:
             log(f"Caught an exception: {e}")   
-                 
+
     countdown_timer(countdown_loop)
 
 if __name__ == "__main__":
