@@ -244,19 +244,23 @@ class DuckChainAPI:
         for category, task_list in tasks.items():
             if isinstance(task_list, list):
                 for task in task_list:
-                    task_id = task.get('taskId')
-                    content = task.get('content')
-                    integral = task.get('integral')
-                    log(hju + f"Initiating task completion: {pth}{content}")
-                    completion_response = self._make_request("/task/partner", {'taskId': task_id})
-                    if completion_response and completion_response.get("code") == 200:
-                        log(kng + f"Task completed successfully. {bru}Reward: {pth}{integral} {bru}Points")
-                    elif completion_response.get("code") == 500:
-                        log(kng + f"Task {pth}{content} {kng}has already been completed.")
-                    else:
-                        log(mrh + f"Task completion failed. Task: {pth}{content} {htm}Response: {completion_response}.")
+                    try:
+                        task_id = task.get('taskId')
+                        content = task.get('content')
+                        integral = task.get('integral')
+                        log(hju + f"Initiating task completion: {pth}{content}")
+                        completion_response = self._make_request(f"/task/{category}", {'taskId': task_id})
+                        if completion_response and completion_response.get("code") == 200:
+                            log(kng + f"Task completed successfully. {bru}Reward: {pth}{integral} {bru}Points")
+                        elif completion_response.get("code") == 500:
+                            log(kng + f"Task {pth}{content} {kng}has already been completed.")
+                        else:
+                            log(mrh + f"Task completion failed. Task: {pth}{content} {htm}Response: {completion_response}.")
+                    except Exception as e:
+                        log(f"Caught an exception: {e}")
             else:
                 log(htm + f"Unexpected task list format encountered for category {kng}{category}: {pth}{task_list}")
+
 
 def get_proxy():
     try:
@@ -329,33 +333,37 @@ def main():
 
     total_accounts = len(tokens)
     for index, token in enumerate(tokens, start=1): 
-        proxy = get_proxy() if use_proxy else None
-        duck = DuckChainAPI(authorization=token, proxy=proxy)
-        log(bru + f"Processing account {pth}{index} of {total_accounts}") 
-        log(htm + "═" * 39)
+        try:
+            proxy = get_proxy() if use_proxy else None
+            duck = DuckChainAPI(authorization=token, proxy=proxy)
+            log(bru + f"Processing account {pth}{index} of {total_accounts}") 
+            log(htm + "═" * 39)
 
-        user_info = duck.get_user_info()
-        if user_info:
-            log_user_info(user_info)
+            user_info = duck.get_user_info()
+            if user_info:
+                log_user_info(user_info)
 
-            duck.perform_sign()
-            duck.open_all_boxes()
+                duck.perform_sign()
+                duck.open_all_boxes()
 
-            for i in range(quack_amount):
-                quack_result = duck.execute_tap()
-                if quack_result:
-                    log_quack_result(quack_result, i + 1)
+                for i in range(quack_amount):
+                    quack_result = duck.execute_tap()
+                    if quack_result:
+                        log_quack_result(quack_result, i + 1)
+                    else:
+                        log(f"{Fore.RED}Quack operation #{i+1} execution failed.")
+                    time.sleep(quack_delay)
+
+                if complete_task:
+                    duck.handle_tasks()
                 else:
-                    log(f"{Fore.RED}Quack operation #{i+1} execution failed.")
-                time.sleep(quack_delay)
+                    log(kng + f"Automated task completion is currently disabled.")
 
-            if complete_task:
-               duck.handle_tasks()
-            else:
-                log(kng + f"Automated task completion is currently disabled.")
-
-            log_line()
-            countdown_timer(account_delay)
+                log_line()
+                countdown_timer(account_delay)
+        except Exception as e:
+            log(f"Caught an exception: {e}")   
+                 
     countdown_timer(countdown_loop)
 
 if __name__ == "__main__":
