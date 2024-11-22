@@ -147,7 +147,7 @@ def headers(authorization):
 # Classes and functions from core.py
 class DuckChainAPI:
     def __init__(self, authorization, proxy=None, timeout=10):
-        self.base_url = "https://preapi.duckchain.io"
+        self.base_url = "https://ppp.duckchain.io"
         self.headers = headers(authorization)
         self.proxy = proxy
         self.timeout = timeout
@@ -263,7 +263,7 @@ class DuckChainAPI:
                             log(kng + f"Task {pth}{content} {kng}has already been completed.")
                         else:
                             log(mrh + f"Task completion failed. Task: {pth}{content} {htm}Response: {completion_response}.")
-                    except Exception as e:
+                    except Exception as e: 
                         log(f"Caught an exception: {e}")
             else:
                 log(htm + f"Unexpected task list format encountered for category {kng}{category}: {pth}{task_list}")
