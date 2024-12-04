@@ -199,6 +199,9 @@ class DuckChainAPI:
     
     def check_egg(self):
         return self._make_request("/property/daily/finish?taskId=1")
+    
+    def spin(self):
+        return self._make_request("/draw/do?size=1")
 
     def execute_tap(self):
         return self._make_request("/quack/execute")
@@ -352,6 +355,7 @@ def main():
 
                 duck.perform_sign()
                 duck.check_egg()
+                duck.spin()
                 duck.open_all_boxes()
 
                 for i in range(quack_amount):
